@@ -2,6 +2,11 @@ NAME := suas_drivers
 
 COMPONENT_ADD_INCLUDEDIRS += include
 
+ifeq ($(CONFIG_SUAS_WITH_ADC), 1)
+COMPONENT_SRCS += \
+	adc.c
+endif
+
 ifeq ($(CONFIG_SUAS_WITH_DHT22), 1)
 COMPONENT_SRCS += \
 	dht22.c \
