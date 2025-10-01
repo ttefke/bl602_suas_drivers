@@ -13,6 +13,11 @@ COMPONENT_SRCS += \
 	dht22_asm.S
 endif
 
+ifeq ($(CONFIG_SUAS_WITH_MMWAVE), 1)
+COMPONENT_SRCS += \
+	mmWave.c
+endif
+
 COMPONENT_SRCDIRS := .
 COMPONENT_OBJS := $(pathsubst %.S,%.o, $(COMPONENT_SRCS))
 COMPONENT_OBJS := $(pathsubst %.c,%.o, $(COMPONENT_SRCS))
