@@ -1,7 +1,7 @@
 # Note: the DHT22 sensor communication over one-wire requires meeting very short and specific time frames
 # Therefore, the part which requires strict deadlines is written in assembly to guarantee sufficient speed
 
-.global getDHT22ReadingsASM    # Make this function globally available
+.global suas_get_dht22_readings_asm # Make this function globally available
 
 .text                          # Start the text segment (program parts)
 
@@ -68,7 +68,7 @@
 # Our function to read data from the sensor
 # Input parameters: a0 -> sensor pin number (uint8_t)
 #                   a1 -> data array address (uint8_t *)
-getDHT22ReadingsASM:
+suas_get_dht22_readings_asm:
     # 0. Prologue: save required information to return from this function without breaking anything else
     addi sp, sp, -MAX_OFFSET       # Increase stack pointer
     sw   fp, SAVE_FP_OFFSET(sp)    # Save frame pointer on stack
@@ -80,7 +80,7 @@ getDHT22ReadingsASM:
 
     # 2. Initialize counter as 0
     lw   t0, COUNTER_VALUE_OFFSET(sp) # Load counter variable
-    mv   t0, x0                       # Zeroize
+    mv   t0, zero                     # Zeroize
     sw   t0, COUNTER_VALUE_OFFSET(sp) # Store zeroized counter
 
     # 3. Set data pin as output pin to be able to request data

@@ -1,23 +1,16 @@
 NAME := suas_drivers
 
 COMPONENT_ADD_INCLUDEDIRS += include
+COMPONENT_PRIV_INCLUDEDIRS += private
 
-ifeq ($(CONFIG_SUAS_WITH_ADC), 1)
 COMPONENT_SRCS += \
-	adc.c
-endif
-
-ifeq ($(CONFIG_SUAS_WITH_DHT22), 1)
-COMPONENT_SRCS += \
+	adc.c \
 	dht22.c \
-	dht22_asm.S
-endif
-
-ifeq ($(CONFIG_SUAS_WITH_MMWAVE), 1)
-COMPONENT_SRCS += \
+	dht22_asm.S \
+	grove_dls.c \
+	i2c.c \
 	mmWave.c
-endif
 
-COMPONENT_SRCDIRS := .
-COMPONENT_OBJS := $(pathsubst %.S,%.o, $(COMPONENT_SRCS))
-COMPONENT_OBJS := $(pathsubst %.c,%.o, $(COMPONENT_SRCS))
+COMPONENT_OBJS := $(COMPONENT_SRCS:.S=.o)
+COMPONENT_OBJS := $(COMPONENT_OBJS:.c=.o)
+COMPONENT_OBJS := $(COMPONENT_OBJS:.cpp=.o)
