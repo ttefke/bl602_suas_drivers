@@ -4,6 +4,7 @@ COMPONENT_ADD_INCLUDEDIRS += include rfid/src
 COMPONENT_PRIV_INCLUDEDIRS += private
 
 COMPONENT_SRCS += \
+	74hc595.c \
 	adc.c \
 	dht22.c \
 	dht22_asm.S \
