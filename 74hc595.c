@@ -1,6 +1,6 @@
 #include <bl_gpio.h>  // GPIO HAL
 #include <bl_timer.h> // Timer HAL
-#include <74hc595.h>  // Header
+#include <suas_74hc595.h>  // Header
 
 #define timer_delay() \
     bl_timer_delay_us(10)
