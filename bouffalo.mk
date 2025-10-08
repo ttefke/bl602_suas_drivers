@@ -12,6 +12,8 @@ COMPONENT_SRCS += \
 	i2c.c \
 	mmWave.c \
 	ssd1306.c \
+	ultrasonic.c \
+	ultrasonic_asm.S \
 	arduino.cpp \
 	serial.cpp \
 	rfid.cpp \
