@@ -130,10 +130,10 @@ suas_get_dht22_readings_asm:
     # 6.2 The sensor now pulls high for short amount of time
     WAIT_UNTIL_GPIO_IS_LOW
 
-    # 7.3. Data arrives
+    # 7. Data arrives
     # This process happens 40 times: we receive low for 50us and then high for either ~28us (0) or ~70us (1)
 1:
-    # Wait until low is over
+    # 7.1 Wait until low is over
     WAIT_UNTIL_GPIO_IS_HIGH
 
     li   t3, 0     # Use t3 as counter
@@ -141,11 +141,11 @@ suas_get_dht22_readings_asm:
 2:
     add  t3, t3, t4 # Increase counter
     
-    # Wait until high is over
+    # 7.2 Wait until high is over
     # Here we jump back to 2b because we also have to increase the counter
     WAIT_UNTIL_GPIO_IS_LOW 2b
 
-    # If current us count is less than 28, we count this as low
+    # 7.3 If current us count is less than 28, we count this as low
     li   t1, 28     # Load 28
     bleu t3, t1, 3f # Jump directly to check the number of iterations if the bit is 0 -> no need to store anything
     
