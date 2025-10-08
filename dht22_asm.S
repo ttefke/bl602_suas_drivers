@@ -168,7 +168,6 @@ suas_get_dht22_readings_asm:
     sll  t4, t4, t3  # Shift left to reach bit position
     or   t1, t1, t4  # Apply boolean or to set bit to 1
     sb   t1, 0(t0)   # Store byte into previously obtained location
-    j    3f          # Jump to macro seven as we wanna omit storing a zero
 3:
     # 9. Jump back until we got our 40 iterations
     # 9.1 Increase counter
