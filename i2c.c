@@ -37,6 +37,6 @@ void suas_initialize_i2c()
     // Register I2C interrupt (event) filter; callback function
     aos_register_event_filter(EV_I2C, suas_event_cb_i2c_interrupt, NULL);
 
-    // Register I2C channel: Channel 0 (pin 3: SDA, pin 4: SCL), frequency 500 kbps
-    hal_i2c_init(0, 500);
+    // Register I2C channel: Channel 0 (pin 3: SDA, pin 4: SCL), frequency 1000 kbps
+    hal_i2c_init(0, 1000);
 }
