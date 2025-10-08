@@ -11,6 +11,7 @@ COMPONENT_SRCS += \
 	grove_dls.c \
 	i2c.c \
 	mmWave.c \
+	ssd1306.c \
 	arduino.cpp \
 	serial.cpp \
 	rfid.cpp \
