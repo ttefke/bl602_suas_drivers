@@ -7,6 +7,9 @@
 // Standard library includes
 #include <stdio.h>
 
+// Own HAL
+#include <suas_i2c.h>
+
 // Callback function to handle I2C interrupts
 static void suas_event_cb_i2c_interrupt(input_event_t *event, [[gnu::unused]] void *private_data)
 {
@@ -37,6 +40,9 @@ void suas_i2c_init()
     // Register I2C interrupt (event) filter; callback function
     aos_register_event_filter(EV_I2C, suas_event_cb_i2c_interrupt, NULL);
 
-    // Register I2C channel: Channel 0 (pin 3: SDA, pin 4: SCL), frequency 1000 kbps
-    hal_i2c_init(0, 1000);
+    // Register I2C channel: Channel 0 (pin 3: SDA, pin 4: SCL)
+    hal_i2c_init(/* Channel */ 0,  /*  Period (adjusted when setting clock */ 15);
+
+    // Set I2C clock
+    I2C_ClockSet(/* Channel */ 0, /* Speed */ SUAS_I2C_STANDARD_SPEED);
 }
