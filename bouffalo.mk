@@ -11,6 +11,7 @@ COMPONENT_SRCS += \
 	grove_dls.c \
 	i2c.c \
 	mmWave.c \
+	pwm.c \
 	ssd1306.c \
 	ultrasonic.c \
 	ultrasonic_asm.S \
