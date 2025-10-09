@@ -12,6 +12,7 @@ COMPONENT_SRCS += \
 	i2c.c \
 	mmWave.c \
 	pwm.c \
+	servo.c \
 	ssd1306.c \
 	ultrasonic.c \
 	ultrasonic_asm.S \
