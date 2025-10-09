@@ -7,7 +7,7 @@
 
 // Driver for waveshare HMMD mmWave: https://www.waveshare.com/wiki/HMMD_mmWave_Sensor
 
-void suas_init_mmwave() {
+void suas_mmwave_init() {
     /* Initialize UART: set baud rate -> from manual */
     suas_uart_init(115200);
 }

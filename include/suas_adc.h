@@ -6,13 +6,13 @@
 #include <bl_adc.h>     //  ADC HAL
 
 // Configuration data type
-typedef struct adc_conf_t {
+typedef struct suas_adc_conf_t {
     uint8_t  pin;
     uint8_t  conversion_mode:   1;
     uint8_t  number_of_samples: 7;
     uint16_t frequency:        14;
     uint8_t  initialized:       1;
-} adc_conf_t;
+} suas_adc_conf_t;
 
 // Define conversion modes
 // 40Hz - 1300Hz
@@ -27,8 +27,8 @@ typedef struct adc_conf_t {
     bl_adc_get_channel_by_gpio(channel)
 
 // Function prototypes
-int suas_init_adc(adc_conf_t *conf);
-uint32_t suas_read_adc(adc_conf_t *conf);
+int suas_adc_init(suas_adc_conf_t *conf);
+uint32_t suas_adc_read(suas_adc_conf_t *conf);
 
 // Header guard end
 #endif

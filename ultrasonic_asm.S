@@ -1,7 +1,7 @@
 # Note: the ultrasonic sensor communication uses the one-write protocol which requires meeting some very short time frames
 # Therefore, the time-critical part of this driver is written in assembly.
 
-.global suas_get_ultrasonic_duration_asm # Make this function globally available
+.global suas_ultrasonic_get_duration_asm # Make this function globally available
 
 # Timeout message
 .section .rodata
@@ -40,7 +40,7 @@ message: .asciz "\r\nUltrasonic: Timeout occurred - please ensure the sensor is 
 .endm
 
 # Function to get the duration of a pulse
-suas_get_ultrasonic_duration_asm:
+suas_ultrasonic_get_duration_asm:
     # 0. Prologue: save information to the stack required to return from this function gracefully later
     addi sp, sp, -MAX_OFFSET    # Increase stack pointer
     sw   fp, SAVE_FP_OFFSET(sp) # Save frame pointer

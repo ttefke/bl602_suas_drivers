@@ -1,3 +1,4 @@
+#include <stdio.h> // For IO operations
 #include <bl_gpio.h>  // GPIO HAL
 #include <bl_timer.h> // Timer HAL
 #include <suas_74hc595.h>  // Header
@@ -9,7 +10,7 @@
     Configure connected shift register(s).
     Must be called first
 */
-void suas_configure_74hc595(struct config_74hc595 *config)
+void suas_74hc595_config(suas_74hc595_conf_t *config)
 {
     /* Configure pins as output */
     if (config->with_output_enable)
@@ -30,16 +31,26 @@ void suas_configure_74hc595(struct config_74hc595 *config)
     bl_gpio_output_set(config->pin_shift_clock, 0);
     bl_gpio_output_set(config->pin_store_clock, 0);
 
-    suas_clear_74hc595(config);
+    /* Mark as initialized */
+    config->initialized = 1;
+
+    /* Clear */
+    suas_74hc595_clear(config);
 }
 
 /*
     Store a byte in the shift register.
-    Only works after configure_74hc595() was called.
+    Only works after suas_74hc595_config() was called.
 */
-void suas_store_data_74hc595(struct config_74hc595 *config, uint8_t data)
+void suas_74hc595_store(suas_74hc595_conf_t *config, uint8_t data)
 {
-    /* Shift out data */
+    // 1. Check if initialized
+    if (!config->initialized) {
+        printf("74hc595 is not yet initialized\r\n");
+        return;
+    }
+
+    /* 2. Shift out data */
     for (uint8_t i = 0; i < 8; i++)
     {
         /* Extract LSB */
@@ -66,10 +77,17 @@ void suas_store_data_74hc595(struct config_74hc595 *config, uint8_t data)
 
 /*
     Clear the output of the registers.
-    Only works after configure_74hc595() was called.
+    Only works after suas_74hc595_config() was called.
 */
-void suas_clear_74hc595(struct config_74hc595 *config)
+void suas_74hc595_clear(suas_74hc595_conf_t *config)
 {
+    // 1. Check if initialized
+    if (!config->initialized) {
+        printf("74hc595 is not yet initialized\r\n");
+        return;
+    }
+
+    // 2. Clear output
     if (config->with_master_reset)
     {
         bl_gpio_output_set(config->pin_master_reset, 0);
@@ -80,7 +98,7 @@ void suas_clear_74hc595(struct config_74hc595 *config)
     {
         for (uint8_t i = 0; i < config->number_of_registers; i++)
         {
-            suas_store_data_74hc595(config, 0);
+            suas_74hc595_store(config, 0);
         }
     }
 

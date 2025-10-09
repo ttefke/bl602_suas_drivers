@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-void suas_init_mmwave();
+void suas_mmwave_init();
 bool suas_mmwave_is_human_present();
 
 #endif

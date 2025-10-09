@@ -32,8 +32,8 @@ extern "C" bool suas_rfid_read_card() {
 }
 
 // Get UID from card
-extern "C" uid_t suas_get_uid() {
-    uid_t retval;
+extern "C" suas_rfc_uid_t suas_rfid_get_uid() {
+    suas_rfc_uid_t retval;
     retval.size = rfid.uid.size;
     memcpy(retval.uid_byte, rfid.uid.uidByte, rfid.uid.size);
     return retval;

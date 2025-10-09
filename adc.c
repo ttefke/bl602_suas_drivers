@@ -11,7 +11,7 @@
 
 #include <suas_adc.h>   // Our own header
 
-static void suas_set_adc_gain(uint32_t gain1, uint32_t gain2) {
+static void suas_adc_set_gain(uint32_t gain1, uint32_t gain2) {
     // Read configuration hardware register
     uint32_t reg = BL_RD_REG(AON_BASE, AON_GPADC_REG_CONFIG2);
     
@@ -40,7 +40,7 @@ static void suas_set_adc_gain(uint32_t gain1, uint32_t gain2) {
 
 // NOTE: pin must be of the following 4, 5, 6, 9, 10, 11, 12, 13, 14, 15
 // Otherwise you may damage your device!
-int suas_init_adc(adc_conf_t *conf) {
+int suas_adc_init(suas_adc_conf_t *conf) {
     // Ensure a valid pin was selected
     if (adc_channel_exists(conf->pin) == -1) {
         printf("Invalid pin selected for ADC\r\n");
@@ -66,7 +66,7 @@ int suas_init_adc(adc_conf_t *conf) {
     bl_adc_init(conf->conversion_mode, conf->pin); // always returns 0 -> nothing to evaluate
     
     // Enable ADC gain
-    suas_set_adc_gain(ADC_PGA_GAIN_1, ADC_PGA_GAIN_1); // returns nothing
+    suas_adc_set_gain(ADC_PGA_GAIN_1, ADC_PGA_GAIN_1); // returns nothing
 
     // Initialize DMA for the ADC channel and for single channel conversion mode
     int result = bl_adc_dma_init(conf->conversion_mode, conf->number_of_samples);
@@ -90,7 +90,7 @@ int suas_init_adc(adc_conf_t *conf) {
     return 0;
 }
 
-uint32_t suas_read_adc(adc_conf_t *conf) {
+uint32_t suas_adc_read(suas_adc_conf_t *conf) {
     // Check if initialized
     if (!conf->initialized) {
         printf("ADC is not initialized!\r\n");

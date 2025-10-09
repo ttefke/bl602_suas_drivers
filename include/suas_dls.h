@@ -3,10 +3,10 @@
 #define __SUAS_DLS_H
 
 // Function prototypes
-int suas_init_grove_dls();
-uint16_t suas_read_ir_luminosity();
-uint16_t suas_read_fs_luminosity();
-unsigned long suas_read_visible_lux();
+int suas_dls_init();
+uint16_t suas_dls_read_ir();
+uint16_t suas_dls_read_fs();
+unsigned long suas_dls_read_visible_lux();
 
 // Sensor constants
 // see https://github.com/Seeed-Studio/Grove_Digital_Light_Sensor/blob/master/Digital_Light_TSL2561.h for reference

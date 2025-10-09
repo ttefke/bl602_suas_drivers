@@ -12,7 +12,7 @@
 #include <suas_ssd1306_font.h>
 
 // Define our own command to send the data
-#define suas_write_ssd1306(data, len) \
+#define suas_ssd1306_write(data, len) \
     hal_i2c_write_block(SSD1306_DEVICE_ADDRESS, data, len, 0, 0)
 
 // Set bursor to a specific page and column
@@ -25,7 +25,7 @@ void suas_ssd1306_set_cursor(uint8_t page, uint8_t column) {
     };
 
     // Send data
-    suas_write_ssd1306(set_cursor_commands,
+    suas_ssd1306_write(set_cursor_commands,
         sizeof(set_cursor_commands) / sizeof(set_cursor_commands[0]));
 }
 
@@ -41,7 +41,7 @@ void suas_ssd1306_clear() {
 
         // Send the data 16 times so that we sent 8 * 16 = 128 zeroes
         for (uint8_t i = 0; i < 16; i++) {
-            suas_write_ssd1306(empty_data,
+            suas_ssd1306_write(empty_data,
                 sizeof(empty_data) / sizeof(empty_data[0]));
         }
     }
@@ -61,7 +61,7 @@ void suas_ssd1306_print_char(char c) {
     memcpy(data + 1, bitmap, 5); // Copy character information into data[1] to data[5]
 
     // Send text
-    suas_write_ssd1306(data,
+    suas_ssd1306_write(data,
         sizeof(data) / sizeof(data[0]));
 }
 
@@ -75,7 +75,7 @@ void suas_ssd1306_print_text(char *text) {
 
 // Initialize the display
 void suas_ssd1306_init() {
-    suas_initialize_i2c();
+    suas_i2c_init();
 
     // Wait until all hardware is ready
     vTaskDelay(100);
@@ -109,7 +109,7 @@ void suas_ssd1306_init() {
     };
 
     // Write data
-    suas_write_ssd1306(initialization_commands,
+    suas_ssd1306_write(initialization_commands,
         sizeof(initialization_commands) / sizeof(initialization_commands[0]));
 
     // Clear screen

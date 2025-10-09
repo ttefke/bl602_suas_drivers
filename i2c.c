@@ -29,7 +29,7 @@ static void suas_event_cb_i2c_interrupt(input_event_t *event, [[gnu::unused]] vo
 }
 
 // I2C Initialization function
-void suas_initialize_i2c()
+void suas_i2c_init()
 {
     // Add I2C hook to real-time looping
     loopset_i2c_hook_on_looprt();
