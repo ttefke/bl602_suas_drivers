@@ -1,6 +1,9 @@
 #ifndef __SUAS_PWM_H
 #define __SUAS_PWM_H
 
+// Support for all integer types
+#include <inttypes.h>
+
 // Data structure to manage all required information
 typedef struct suas_pwm_conf_t {
     uint8_t channel: 3; /* PWM channel*/
