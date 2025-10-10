@@ -8,66 +8,92 @@ extern "C" {
 }
 
 // Porting layer allowing to use the Arduino rfid library on the PineCone
-// code taken from https://github.com/bouffalolab/arduino-bouffalo/
+// code inspired from https://github.com/bouffalolab/arduino-bouffalo/
 
 void spiInterrupt([[gnu::unused]] void* ctx) {}
 
+// Configure SPI
 void SPIClass::begin()
 {
-  uint8_t gpio_pins[] = {
-    SS,
-    SCK,
-    MOSI,
-    MISO,
-  };
+    // Configuration array for GPIO pins
+    uint8_t gpio_pins[] = {
+        SS,   /* Chip select */
+        SCK,  /* Clock       */
+        MOSI, /* MOSI        */
+        MISO, /* MISO        */
+    };
 
-  GLB_Swap_SPI_0_MOSI_With_MISO(ENABLE);
-  GLB_GPIO_Func_Init(GPIO_FUN_SPI, (GLB_GPIO_Type*)gpio_pins, 4);
+    // Ensure MOSI and MISO pins are as in the manual
+    GLB_Swap_SPI_0_MOSI_With_MISO(ENABLE);
 
-  GLB_Set_SPI_0_ACT_MOD_Sel(GLB_SPI_PAD_ACT_AS_MASTER);
+    // Configure SPI pins
+    GLB_GPIO_Func_Init(GPIO_FUN_SPI, (GLB_GPIO_Type*) gpio_pins, 
+        sizeof(gpio_pins) / sizeof(gpio_pins[0]));
 
-  SPI_IntMask((SPI_ID_Type)0, SPI_INT_ALL,MASK);
-  bl_irq_enable(SPI_IRQn);
-  bl_irq_register_with_ctx(SPI_IRQn, (void*)spiInterrupt, this);
+    // Initialize as SPI master
+    GLB_Set_SPI_0_ACT_MOD_Sel(GLB_SPI_PAD_ACT_AS_MASTER);
 
-  SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
-  SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_SLAVE);
+    // Enable interrupt
+    SPI_IntMask((SPI_ID_Type)0, SPI_INT_ALL,MASK);
+    bl_irq_enable(SPI_IRQn);
+    bl_irq_register_with_ctx(SPI_IRQn, (void*)spiInterrupt, this);
+
+    // Disable SPI transfer (for now)
+    SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
+    SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_SLAVE);
 }
 
+// Start a transaction
 void SPIClass::beginTransaction(SPISettings settings) {
-    SPI_CFG_Type spiConfig;
-    SPI_FifoCfg_Type fifoConfig;
-    
+    /* Set SPI frequency if not already set */
     if (this->currentFrequency != settings.clock) {
         this->setFrequency(settings.clock);
     }
 
-    spiConfig.deglitchEnable = DISABLE;
-    spiConfig.continuousEnable = ENABLE;
-    spiConfig.byteSequence = SPI_BYTE_INVERSE_BYTE0_FIRST,
-    spiConfig.bitSequence = settings.bitOrder == SPI_MSBFIRST ? SPI_BIT_INVERSE_MSB_FIRST : SPI_BIT_INVERSE_LSB_FIRST,
-    spiConfig.frameSize = SPI_FRAME_SIZE_8;
+    /* Set SPI configuration -> see manual p. 120f. */
+    SPI_CFG_Type spiConfig;
+    spiConfig.deglitchEnable = ENABLE; // Disable deglitch function -> this is important to work around some bugs
+    spiConfig.continuousEnable = ENABLE; // Enable continuous mode
+    spiConfig.byteSequence = SPI_BYTE_INVERSE_BYTE0_FIRST, // Set byte sequence order
+    spiConfig.bitSequence = settings.bitOrder == SPI_MSBFIRST ? SPI_BIT_INVERSE_MSB_FIRST : SPI_BIT_INVERSE_LSB_FIRST, // Set bit sequence order
+    spiConfig.frameSize = SPI_FRAME_SIZE_8; // Set frame size -> send each byte individually
     
+    // Set clock phase and polarity
     //spiConfig.clkPhaseInv = (settings.dataMode == SPI_MODE0 || settings.dataMode == SPI_MODE2) ? SPI_CLK_PHASE_INVERSE_0 : SPI_CLK_PHASE_INVERSE_1;
     //spiConfig.clkPolarity = (settings.dataMode == SPI_MODE0 || settings.dataMode == SPI_MODE1) ? SPI_CLK_POLARITY_LOW : SPI_CLK_POLARITY_HIGH;
     spiConfig.clkPhaseInv = SPI_CLK_PHASE_INVERSE_0;
     spiConfig.clkPolarity = SPI_CLK_POLARITY_HIGH;
 
+    /* Initialize SPI configuration */
     SPI_Init((SPI_ID_Type)0, &spiConfig);
 
+    /* Disable FIFO queue for DMA  -> see manual p. 124f.*/
+    SPI_FifoCfg_Type fifoConfig;
     fifoConfig.txFifoThreshold = 1;
     fifoConfig.rxFifoThreshold = 5;
     fifoConfig.txFifoDmaEnable = DISABLE;
     fifoConfig.rxFifoDmaEnable = DISABLE;
     SPI_FifoConfig((SPI_ID_Type)0, &fifoConfig);
 
-    //SPI_IntMask((SPI_ID_Type)0, SPI_INT_ALL, UNMASK);
+    /* Enable SPI transfer */
     SPI_Enable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
 }
 
 
 void SPIClass::setFrequency(uint32_t frequency) {
+    /* Check if frequency is in allowed bounds */
+    if (frequency > 40000000) {
+        printf("The SPI frequency is too high!\r\n");
+        return;
+    } else if (frequency < 156250) {
+        printf("The SPI frequency is too low!\r\n");
+        return;
+    }
+
+    /* Configure SPI clock */
     SPI_ClockCfg_Type clockConfig;
+
+    /* Set clock divider */
     uint8_t clockDivider = (uint8_t)(40000000 / frequency);
     GLB_Set_SPI_CLK(ENABLE, 0);
     clockConfig.startLen = clockDivider;
@@ -75,21 +101,27 @@ void SPIClass::setFrequency(uint32_t frequency) {
     clockConfig.dataPhase0Len = clockDivider;
     clockConfig.dataPhase1Len = clockDivider;
     clockConfig.intervalLen = clockDivider;
+
+    /* Configure clock */
     SPI_ClockConfig((SPI_ID_Type)0, &clockConfig);
 }
 
 uint8_t SPIClass::transfer(uint8_t data) {
-    SPI_RxIgnoreDisable((SPI_ID_Type)0);
-    SPI_SendData((SPI_ID_Type)0, data);
-    while(SPI_GetRxFifoCount((SPI_ID_Type)0) == 0) {}
-    return SPI_ReceiveData((SPI_ID_Type)0);
+    /* Send eight bits (one byte)*/
+    uint8_t result;
+    SPI_SendRecv_8bits((SPI_ID_Type) 0, &data, &result, 1, SPI_TIMEOUT_ENABLE);
+    return result;
 }
 
 void SPIClass::endTransaction(void) {
+    /* Clear SPI ended interrupt */
     uint32_t tmpval;
-    tmpval = BL_RD_REG(SPI_BASE, SPI_INT_STS); // TODO: Rework
-    BL_WR_REG(SPI_BASE,SPI_INT_STS,BL_SET_REG_BIT(tmpval,SPI_CR_SPI_END_CLR));
+    tmpval = BL_RD_REG(SPI_BASE, SPI_INT_STS);
+    BL_WR_REG(SPI_BASE,SPI_INT_STS, BL_SET_REG_BIT(tmpval, SPI_CR_SPI_END_CLR));
+
+    /* Disable SPI */
     SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
 }
 
+/* SPI class to include for the drivers */
 SPIClass SPI;
