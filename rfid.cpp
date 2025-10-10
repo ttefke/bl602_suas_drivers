@@ -14,11 +14,8 @@ extern SPIClass SPI;
 // Initialize chip
 extern "C" void suas_rfid_init() {
     Serial.begin(9600);
-    Serial.println("Initializing RFID module (1/2)");
     SPI.begin();
-    Serial.println("Initializing RFID module (2/2)");
     rfid.PCD_Init();
-    Serial.println("Initialized RFID module");
 }
 
 // Check if new card is present
