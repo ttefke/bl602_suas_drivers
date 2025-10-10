@@ -1,8 +1,10 @@
+#include <Arduino.h>
 #include <SPI.h>
 
 extern "C" {
     #include <bl602_spi.h>
     #include <bl602_glb.h>
+    #include <bl_gpio.h>
     #include <bl_irq.h>
     #include <spi_reg.h>
 }
@@ -17,7 +19,7 @@ void SPIClass::begin()
 {
     // Configuration array for GPIO pins
     uint8_t gpio_pins[] = {
-        SS,   /* Chip select */
+        6,    /* Chip select -> this is a dummy pin, we control the CS pin manually*/
         SCK,  /* Clock       */
         MOSI, /* MOSI        */
         MISO, /* MISO        */
@@ -27,8 +29,11 @@ void SPIClass::begin()
     GLB_Swap_SPI_0_MOSI_With_MISO(ENABLE);
 
     // Configure SPI pins
-    GLB_GPIO_Func_Init(GPIO_FUN_SPI, (GLB_GPIO_Type*) gpio_pins, 
-        sizeof(gpio_pins) / sizeof(gpio_pins[0]));
+    GLB_GPIO_Func_Init(
+        GPIO_FUN_SPI,                            // Function -> SPI
+        (GLB_GPIO_Type*) gpio_pins,              // Affected pin(s)
+        sizeof(gpio_pins) / sizeof(gpio_pins[0]) // Size of pin(s) aray
+    );
 
     // Initialize as SPI master
     GLB_Set_SPI_0_ACT_MOD_Sel(GLB_SPI_PAD_ACT_AS_MASTER);
@@ -41,6 +46,20 @@ void SPIClass::begin()
     // Disable SPI transfer (for now)
     SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
     SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_SLAVE);
+
+    // Configure CS pin as output
+    bl_gpio_enable_output(SS, /* No pullup/pulldown */ LOW, LOW);
+
+    // Set CS pin to high (active low)
+    bl_gpio_output_set(SS, HIGH);
+
+    // Free pin 6 again
+    uint8_t pin[] = {6};
+    GLB_GPIO_Func_Init(
+        GPIO_FUN_SWGPIO,             // Function -> GPIO
+        (GLB_GPIO_Type*) pin,        // Affected pin(s)
+        sizeof(pin) / sizeof(pin[0]) // Size of pin(s) aray
+    );
 }
 
 // Start a transaction
@@ -49,6 +68,9 @@ void SPIClass::beginTransaction(SPISettings settings) {
     if (this->currentFrequency != settings.clock) {
         this->setFrequency(settings.clock);
     }
+
+    /* Set CS pin to low */
+    bl_gpio_output_set(SS, LOW);
 
     /* Set SPI configuration -> see manual p. 120f. */
     SPI_CFG_Type spiConfig;
@@ -121,6 +143,9 @@ void SPIClass::endTransaction(void) {
 
     /* Disable SPI */
     SPI_Disable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
+
+    /* Set CS to high again */
+    bl_gpio_output_set(SS, HIGH);
 }
 
 /* SPI class to include for the drivers */
