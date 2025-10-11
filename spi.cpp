@@ -2,6 +2,11 @@
 #include <SPI.h>
 
 extern "C" {
+    // FreeRTOS
+    #include <FreeRTOS.h>
+    #include <task.h>
+
+    // HALs
     #include <bl602_spi.h>
     #include <bl602_glb.h>
     #include <bl_gpio.h>
@@ -24,6 +29,8 @@ void SPIClass::begin()
         MOSI, /* MOSI        */
         MISO, /* MISO        */
     };
+
+    taskENTER_CRITICAL(); // Lock
 
     // Ensure MOSI and MISO pins are as in the manual
     GLB_Swap_SPI_0_MOSI_With_MISO(ENABLE);
@@ -60,6 +67,8 @@ void SPIClass::begin()
         (GLB_GPIO_Type*) pin,        // Affected pin(s)
         sizeof(pin) / sizeof(pin[0]) // Size of pin(s) aray
     );
+
+    taskEXIT_CRITICAL(); // Unlock
 }
 
 // Start a transaction
@@ -68,6 +77,8 @@ void SPIClass::beginTransaction(SPISettings settings) {
     if (this->currentFrequency != settings.clock) {
         this->setFrequency(settings.clock);
     }
+
+    taskENTER_CRITICAL(); // Lock
 
     /* Set CS pin to low */
     bl_gpio_output_set(SS, LOW);
@@ -99,6 +110,8 @@ void SPIClass::beginTransaction(SPISettings settings) {
 
     /* Enable SPI transfer */
     SPI_Enable((SPI_ID_Type)0, SPI_WORK_MODE_MASTER);
+
+    taskEXIT_CRITICAL(); // Unlock
 }
 
 
@@ -111,6 +124,8 @@ void SPIClass::setFrequency(uint32_t frequency) {
         printf("The SPI frequency is too low!\r\n");
         return;
     }
+
+    taskENTER_CRITICAL(); // Lock
 
     /* Configure SPI clock */
     SPI_ClockCfg_Type clockConfig;
@@ -126,16 +141,22 @@ void SPIClass::setFrequency(uint32_t frequency) {
 
     /* Configure clock */
     SPI_ClockConfig((SPI_ID_Type)0, &clockConfig);
+
+    taskEXIT_CRITICAL(); // Unlock
 }
 
 uint8_t SPIClass::transfer(uint8_t data) {
     /* Send eight bits (one byte)*/
     uint8_t result;
+    taskENTER_CRITICAL(); // Lock
     SPI_SendRecv_8bits((SPI_ID_Type) 0, &data, &result, 1, SPI_TIMEOUT_ENABLE);
+    taskEXIT_CRITICAL(); // Unlock
     return result;
 }
 
 void SPIClass::endTransaction(void) {
+    taskENTER_CRITICAL(); // Lock
+
     /* Clear SPI ended interrupt */
     uint32_t tmpval;
     tmpval = BL_RD_REG(SPI_BASE, SPI_INT_STS);
@@ -146,6 +167,8 @@ void SPIClass::endTransaction(void) {
 
     /* Set CS to high again */
     bl_gpio_output_set(SS, HIGH);
+
+    taskEXIT_CRITICAL(); // Unlock
 }
 
 /* SPI class to include for the drivers */
