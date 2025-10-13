@@ -6,30 +6,31 @@
 #error "CPP only"
 #endif
 
-#include <Serial.h>
 #include <SPI.h>
+#include <Serial.h>
+
 #include <cstdint>
 #include <cstring>
 
 extern "C" {
-    #include <FreeRTOS.h>
-    #include <task.h>
-    #include <bl_timer.h>
+#include <FreeRTOS.h>
+#include <bl_timer.h>
+#include <task.h>
 }
 
 // Arduino types
 typedef uint8_t byte;
-typedef bool    boolean;
+typedef bool boolean;
 
 // Progmem compatibility
 #define PROGMEM
-#define pgm_read_byte(addr) (*(const unsigned char *) (addr))
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 
 // Flash strings
 #define __FlashStringHelper char
 #define F(x) (x)
 
-//MSB/LSB
+// MSB/LSB
 #define LSBFIRST 0
 #define MSBFIRST 1
 

@@ -3,15 +3,15 @@
 #define __SUAS_ADC_H
 
 // ADC libraries
-#include <bl_adc.h>     //  ADC HAL
+#include <bl_adc.h>  //  ADC HAL
 
 // Configuration data type
 typedef struct suas_adc_conf_t {
-    uint8_t  pin;
-    uint8_t  conversion_mode:   1;
-    uint8_t  number_of_samples: 7;
-    uint16_t frequency:        14;
-    uint8_t  initialized:       1;
+  uint8_t pin;
+  uint8_t conversion_mode : 1;
+  uint8_t number_of_samples : 7;
+  uint16_t frequency : 14;
+  uint8_t initialized : 1;
 } suas_adc_conf_t;
 
 // Define conversion modes
@@ -23,8 +23,7 @@ typedef struct suas_adc_conf_t {
 
 // Give this function a second name which
 // has a name that suits our use case better
-#define adc_channel_exists(channel) \
-    bl_adc_get_channel_by_gpio(channel)
+#define adc_channel_exists(channel) bl_adc_get_channel_by_gpio(channel)
 
 // Function prototypes
 int suas_adc_init(suas_adc_conf_t *conf);

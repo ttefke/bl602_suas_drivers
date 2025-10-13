@@ -16,14 +16,14 @@
 #define HEX 16
 
 class SerialClass {
-public:
-    void begin(unsigned long baud);
-    size_t print(const char[]);
-    size_t print(int, int = DEC);
+ public:
+  void begin(unsigned long baud);
+  size_t print(const char[]);
+  size_t print(int, int = DEC);
 
-    size_t println(const char[]);
-    size_t println(int, int = DEC);
-    size_t println(void);
+  size_t println(const char[]);
+  size_t println(int, int = DEC);
+  size_t println(void);
 };
 
 extern SerialClass Serial;

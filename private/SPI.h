@@ -37,10 +37,12 @@
 #define SPI_MSBFIRST 1
 
 class SPISettings {
-public:
+ public:
   SPISettings() : clock(1000000), bitOrder(SPI_MSBFIRST), dataMode(SPI_MODE0) {}
-  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : clock(clock), bitOrder(bitOrder), dataMode(dataMode) {}
-private:
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
+      : clock(clock), bitOrder(bitOrder), dataMode(dataMode) {}
+
+ private:
   uint32_t clock;
   uint8_t bitOrder;
   uint8_t dataMode;
@@ -48,14 +50,14 @@ private:
 };
 
 class SPIClass {
-public:
+ public:
   void begin();
   void beginTransaction(SPISettings settings);
   void setFrequency(uint32_t frequency);
   uint8_t transfer(uint8_t data);
   void endTransaction(void);
 
-private:
+ private:
   bool inTransaction = false;
   uint32_t currentFrequency = 0;
   friend void spiInterrupt(void* ctx);

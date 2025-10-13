@@ -3,8 +3,8 @@
 
 // Data structure to get the uid from the card
 typedef struct suas_rfid_uid_t {
-    uint8_t size;
-    uint8_t uid_byte[10];
+  uint8_t size;
+  uint8_t uid_byte[10];
 } suas_rfid_uid_t;
 
 // Function prototypes
