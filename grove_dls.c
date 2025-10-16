@@ -86,7 +86,7 @@ int suas_dls_init() {
 // readVisibleLux Stores data in global variables ch0 and ch1
 static int8_t suas_dls_get_lux() {
   // Set up variables to read data
-  char readings[4] = {0};
+  char *readings = (char *)malloc(4 * sizeof(char));
   int result = -1;
 
   // Send data request information: power up
@@ -101,31 +101,31 @@ static int8_t suas_dls_get_lux() {
   vTaskDelay(pdMS_TO_TICKS(14));
 
   // Read lower part of channel 0, destination: readings[0]
-  result = suas_dls_read_byte(readings[0], GROVE_DLS_1_1_CHANNEL_0L);
+  result = suas_dls_read_byte(readings, GROVE_DLS_1_1_CHANNEL_0L);
   if (result != 0) {  // Return error if error occurred
     printf("Error reading 0L register\r\n");
-    return -1;
+    goto error;
   }
 
   // Read upper part of channel 0, destination: readings[1]
-  result = suas_dls_read_byte(readings[1], GROVE_DLS_1_1_CHANNEL_0H);
+  result = suas_dls_read_byte(readings + 1, GROVE_DLS_1_1_CHANNEL_0H);
   if (result != 0) {  // Return error if error occurred
     printf("Error reading 0H register\r\n");
-    return -1;
+    goto error;
   }
 
   // Read lower part of channel 1, destination: readings[2]
-  result = suas_dls_read_byte(readings[2], GROVE_DLS_1_1_CHANNEL_1L);
+  result = suas_dls_read_byte(readings + 2, GROVE_DLS_1_1_CHANNEL_1L);
   if (result != 0) {  // Return error if error occurred
     printf("Error reading 1L register\r\n");
-    return -1;
+    goto error;
   }
 
   // Read higher part of channel 1, destination: readings[3]
-  result = suas_dls_read_byte(readings[3], GROVE_DLS_1_1_CHANNEL_1H);
+  result = suas_dls_read_byte(readings + 3, GROVE_DLS_1_1_CHANNEL_1H);
   if (result != 0) {  // Return error if error occurred
     printf("Error reading 1H register\r\n");
-    return -1;
+    goto error;
   }
 
   // Combine upper and lower channel parts into 16-bit data structure
@@ -137,11 +137,20 @@ static int8_t suas_dls_get_lux() {
                                GROVE_DLS_1_1_TIMING_ADDRESS);
   if (result != 0) {  // Return error if error occurred
     printf("Error finishing to read data\r\n");
-    return -1;
+    goto error;
   }
+
+  // Free readings variable
+  free(readings);
+  readings = NULL;
 
   // Return success
   return 0;
+
+error:
+  free(readings);
+  readings = NULL;
+  return -1;
 }
 
 // Functions below calculate the IR, full spectrum and visible Lux
