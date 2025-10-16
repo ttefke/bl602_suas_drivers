@@ -6,7 +6,9 @@
 #error "CPP only"
 #endif
 
-#include <cstdint>
+extern "C" {
+#include <stdint.h>
+}
 
 // Chip select pin
 #ifndef SS

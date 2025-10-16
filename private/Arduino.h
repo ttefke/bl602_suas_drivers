@@ -9,12 +9,11 @@
 #include <SPI.h>
 #include <Serial.h>
 
-#include <cstdint>
-#include <cstring>
-
 extern "C" {
 #include <FreeRTOS.h>
 #include <bl_timer.h>
+#include <stdint.h>
+#include <string.h>
 #include <task.h>
 }
 

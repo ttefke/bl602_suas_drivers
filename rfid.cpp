@@ -1,9 +1,7 @@
 #include <MFRC522.h>
 
-#include <cstdint>
-#include <cstdio>
-
 extern "C" {
+#include <stdint.h>
 #include <suas_rfid.h>
 }
 

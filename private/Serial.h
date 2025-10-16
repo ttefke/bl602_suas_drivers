@@ -6,8 +6,10 @@
 #error "CPP only"
 #endif
 
-#include <cstddef>
-#include <cstdint>
+extern "C" {
+#include <stddef.h>
+#include <stdint.h>
+}
 
 // Encodings
 #define BIN 2
